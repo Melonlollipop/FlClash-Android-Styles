@@ -798,6 +798,39 @@ void main() {
       expect(_barHeight(tester), 96);
     });
 
+    testWidgets('expands a title a replaced list left collapsed', (
+      tester,
+    ) async {
+      final cleared = ValueNotifier(false);
+      addTearDown(cleared.dispose);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        _styled(
+          CommonScaffold(
+            title: 'Page',
+            body: ValueListenableBuilder(
+              valueListenable: cleared,
+              builder: (context, value, _) => value
+                  ? AppBarClearance(child: ListView(children: [_rows()]))
+                  : ListView(
+                      controller: controller,
+                      padding: EdgeInsets.only(top: context.appBarInset),
+                      children: [_rows()],
+                    ),
+            ),
+          ),
+        ),
+      );
+      controller.jumpTo(600);
+      await tester.pump();
+      expect(_barHeight(tester), 56);
+
+      cleared.value = true;
+      await tester.pumpAndSettle();
+      expect(_barHeight(tester), 96);
+    });
+
     testWidgets('names the page once and keeps back working', (tester) async {
       final semantics = tester.ensureSemantics();
       var backs = 0;

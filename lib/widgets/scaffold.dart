@@ -967,10 +967,28 @@ class _KeyboardSpacer extends StatelessWidget {
 }
 
 /// Holds a body whose top stays put clear of the bar floating over it.
-class AppBarClearance extends StatelessWidget {
+class AppBarClearance extends StatefulWidget {
   const AppBarClearance({super.key, required this.child});
 
   final Widget child;
+
+  @override
+  State<AppBarClearance> createState() => _AppBarClearanceState();
+}
+
+class _AppBarClearanceState extends State<AppBarClearance> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(_expandStaleTitle);
+  }
+
+  void _expandStaleTitle(Duration _) {
+    if (mounted) {
+      context.findAncestorStateOfType<CommonScaffoldState>()?._collapse.value =
+          0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -979,7 +997,7 @@ class AppBarClearance extends StatelessWidget {
       child: MediaQuery.removePadding(
         context: context,
         removeTop: true,
-        child: FloatingBarScope(inset: 0, child: child),
+        child: FloatingBarScope(inset: 0, child: widget.child),
       ),
     );
   }
