@@ -88,8 +88,26 @@ class CommonScaffold extends StatefulWidget {
       ? LargeTitleHeader.expandedHeightOf(context)
       : pageToolbarHeight;
 
+  /// How far above its body's top inset a page's bar can end.
+  static double collapseExtentOf(BuildContext context) {
+    final extent = context
+        .dependOnInheritedWidgetOfExactType<_CollapseScope>()
+        ?.extent;
+    return (FloatingBarScope.of(context) ?? 0) > 0 ? extent ?? 0 : 0;
+  }
+
   @override
   State<CommonScaffold> createState() => CommonScaffoldState();
+}
+
+class _CollapseScope extends InheritedWidget {
+  const _CollapseScope({required this.extent, required super.child});
+
+  final double extent;
+
+  @override
+  bool updateShouldNotify(_CollapseScope oldWidget) =>
+      extent != oldWidget.extent;
 }
 
 bool _hasLargeTitle(BuildContext context) {
@@ -680,8 +698,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
     );
   }
 
-  Widget _trackCollapse(Widget body) {
-    return NotificationListener<ScrollMetricsNotification>(
+  Widget _trackCollapse(Widget body, {required bool largeTitle}) {
+    final tracked = NotificationListener<ScrollMetricsNotification>(
       onNotification: (notification) => _updateCollapse(
         notification.metrics,
         notification.depth,
@@ -695,6 +713,18 @@ class CommonScaffoldState extends State<CommonScaffold> {
         ),
         child: body,
       ),
+    );
+    return ValueListenableBuilder<AppBarState>(
+      valueListenable: _appBarState,
+      builder: (context, _, child) => _CollapseScope(
+        extent: !largeTitle
+            ? 0
+            : _isSearch
+            ? LargeTitleHeader.expandedHeightOf(context) - pageToolbarHeight
+            : LargeTitleHeader.titleExtentOf(context),
+        child: child!,
+      ),
+      child: tracked,
     );
   }
 
@@ -884,7 +914,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
         child: Scaffold(
           appBar: appBar,
           extendBodyBehindAppBar: barFloats,
-          body: _trackCollapse(content),
+          body: _trackCollapse(content, largeTitle: largeTitle),
           resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
           backgroundColor: widget.backgroundColor,
           floatingActionButton: fab,
