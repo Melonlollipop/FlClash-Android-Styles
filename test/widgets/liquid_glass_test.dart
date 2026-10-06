@@ -32,28 +32,44 @@ PaintPatternPredicate _blendsWith(BlendMode blendMode) {
       method != #drawRect || (arguments.last as Paint).blendMode == blendMode;
 }
 
+ContainerLayer _swollenLeaf() {
+  final root = TransformLayer(
+    transform: Matrix4.diagonal3Values(2.75, 2.75, 1),
+  );
+  final offset = OffsetLayer(offset: const Offset(10, 20));
+  final swell = TransformLayer(transform: Matrix4.diagonal3Values(1.5, 1.5, 1));
+  final leaf = ContainerLayer();
+  root.append(offset);
+  offset.append(swell);
+  swell.append(leaf);
+  addTearDown(root.dispose);
+  return leaf;
+}
+
 void main() {
   group('backdropTransform', () {
     test('maps a layer through offsets and transforms to device pixels', () {
-      final root = TransformLayer(
-        transform: Matrix4.diagonal3Values(2.75, 2.75, 1),
-      );
-      final offset = OffsetLayer(offset: const Offset(10, 20));
-      final swell = TransformLayer(
-        transform: Matrix4.diagonal3Values(1.5, 1.5, 1),
-      );
-      final leaf = ContainerLayer();
-      root.append(offset);
-      offset.append(swell);
-      swell.append(leaf);
-      addTearDown(root.dispose);
-
-      final transform = backdropTransform(leaf)!;
+      final transform = backdropTransform(_swollenLeaf())!;
 
       expect(
         MatrixUtils.transformRect(transform, const Rect.fromLTWH(4, 2, 8, 6)),
         const Rect.fromLTWH(44, 63.25, 33, 24.75),
       );
+    });
+
+    test('places and scales the lens uniforms in backdrop pixels', () {
+      final uniforms = lensUniforms(
+        backdropTransform(_swollenLeaf())!,
+        const Rect.fromLTWH(4, 2, 8, 6),
+        refractionHeight: 24,
+        refractionAmount: 24,
+      );
+
+      expect(uniforms, <double>[
+        33, 24.75, -44, -63.25, //
+        12.375, 12.375, 12.375, 12.375, //
+        99, -99,
+      ]);
     });
 
     test('gives up under a layer that reads the backdrop on its own', () {

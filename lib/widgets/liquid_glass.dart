@@ -426,6 +426,31 @@ Matrix4? backdropTransform(Layer layer) {
   return transform;
 }
 
+/// The lens shaders' uniforms that follow the engine-set input size.
+@visibleForTesting
+List<double> lensUniforms(
+  Matrix4 toBackdrop,
+  Rect rect, {
+  required double refractionHeight,
+  required double refractionAmount,
+}) {
+  final shape = MatrixUtils.transformRect(toBackdrop, rect);
+  final scale = shape.shortestSide / rect.shortestSide;
+  final radius = shape.shortestSide / 2;
+  return [
+    shape.width,
+    shape.height,
+    -shape.left,
+    -shape.top,
+    radius,
+    radius,
+    radius,
+    radius,
+    refractionHeight * scale,
+    -refractionAmount * scale,
+  ];
+}
+
 class _LensBackdrop extends SingleChildRenderObjectWidget {
   const _LensBackdrop({
     required this.shader,
@@ -547,20 +572,15 @@ class _LensLayer extends ContainerLayer {
     if (transform == null || rect.isEmpty) {
       return blur;
     }
-    final shape = MatrixUtils.transformRect(transform, rect);
-    final scale = shape.shortestSide / rect.shortestSide;
-    final radius = shape.shortestSide / 2;
-    shader
-      ..setFloat(2, shape.width)
-      ..setFloat(3, shape.height)
-      ..setFloat(4, -shape.left)
-      ..setFloat(5, -shape.top)
-      ..setFloat(6, radius)
-      ..setFloat(7, radius)
-      ..setFloat(8, radius)
-      ..setFloat(9, radius)
-      ..setFloat(10, refractionHeight * scale)
-      ..setFloat(11, -refractionAmount * scale);
+    final uniforms = lensUniforms(
+      transform,
+      rect,
+      refractionHeight: refractionHeight,
+      refractionAmount: refractionAmount,
+    );
+    for (final (index, value) in uniforms.indexed) {
+      shader.setFloat(index + 2, value);
+    }
     final lens = ui.ImageFilter.shader(shader);
     final inner = blur;
     return inner == null
