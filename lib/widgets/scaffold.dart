@@ -877,7 +877,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
         child: Scaffold(
           appBar: appBar,
           extendBodyBehindAppBar: barFloats,
-          body: largeTitle ? _trackCollapse(content) : content,
+          body: _trackCollapse(content),
           resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
           backgroundColor: widget.backgroundColor,
           floatingActionButton: fab,

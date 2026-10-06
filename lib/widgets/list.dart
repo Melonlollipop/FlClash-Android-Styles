@@ -660,15 +660,24 @@ List<Widget> generateSection({
 }
 
 /// Material runs a section edge to edge; Miuix groups its rows into a card
-/// inside the list margin.
-class _SectionEntry extends StatelessWidget {
+/// inside the list margin. A style switch moves the row between the two
+/// rather than rebuilding it, so an open container keeps its tile.
+class _SectionEntry extends StatefulWidget {
   const _SectionEntry({this.position, required this.child});
 
   final ItemPosition? position;
   final Widget child;
 
   @override
+  State<_SectionEntry> createState() => _SectionEntryState();
+}
+
+class _SectionEntryState extends State<_SectionEntry> {
+  final _childKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
+    final child = KeyedSubtree(key: _childKey, child: widget.child);
     if (!context.interfaceStyle.isMiuix) {
       return child;
     }
@@ -676,7 +685,7 @@ class _SectionEntry extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: _MiuixList.margin),
       child: child,
     );
-    final position = this.position;
+    final position = widget.position;
     return position == null
         ? entry
         : ItemPositionProvider(position: position, child: entry);

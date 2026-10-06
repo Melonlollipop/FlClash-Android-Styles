@@ -2,6 +2,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -28,6 +29,23 @@ Widget _styled(
         colorScheme: miuixColorScheme(brightness),
       ).withAppShapes.withInterfaceStyle(style),
       child: Material(child: child),
+    ),
+    child: child,
+  );
+}
+
+Widget _flippable(Widget child, ValueNotifier<InterfaceStyleTheme> style) {
+  return TestApp(
+    overrides: [isMobileViewProvider.overrideWithValue(true)],
+    homeBuilder: (child) => ValueListenableBuilder(
+      valueListenable: style,
+      builder: (_, value, child) => Theme(
+        data: ThemeData(
+          colorScheme: _light,
+        ).withAppShapes.withInterfaceStyle(value),
+        child: Material(child: child),
+      ),
+      child: child,
     ),
     child: child,
   );
@@ -462,6 +480,58 @@ void main() {
       expect(find.byType(DecorationListItem), findsNothing);
       expect(tester.getTopLeft(find.text('Flat')).dx, 16);
     });
+
+    testWidgets('a style switch keeps the rows and their open container', (
+      tester,
+    ) async {
+      final style = ValueNotifier(_material);
+      addTearDown(style.dispose);
+      await tester.pumpWidget(
+        _flippable(
+          CommonScaffold(
+            title: 'Tools',
+            body: Builder(
+              builder: (context) => ListView(
+                padding: EdgeInsets.only(top: context.appBarInset),
+                children: generateSection(
+                  title: 'Settings',
+                  items: [
+                    ListItem(title: const Text('Language'), onTap: () {}),
+                    ListItem.open(
+                      title: const Text('Theme'),
+                      widget: const SizedBox(),
+                    ),
+                    for (var i = 0; i < 12; i++)
+                      ListItem(title: Text('Row $i'), onTap: () {}),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          style,
+        ),
+      );
+      final scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
+      scrollable.position.jumpTo(60);
+      await tester.pump();
+      final openContainer = tester.state(find.byType(OpenContainer<dynamic>));
+
+      for (final next in [_miuix, _material]) {
+        style.value = next;
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byType(DecorationListItem),
+          next.isMiuix ? findsWidgets : findsNothing,
+        );
+        expect(tester.state(find.byType(Scrollable)), same(scrollable));
+        expect(scrollable.position.pixels, 60);
+        expect(
+          tester.state(find.byType(OpenContainer<dynamic>)),
+          same(openContainer),
+        );
+      }
+    });
   });
 
   group('large title', () {
@@ -552,6 +622,44 @@ void main() {
       controller.jumpTo(controller.position.maxScrollExtent);
       await tester.pump();
       expect(_barHeight(tester), 96);
+    });
+
+    testWidgets('keeps the body mounted as the style switches', (tester) async {
+      final style = ValueNotifier(_material);
+      addTearDown(style.dispose);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        _flippable(
+          CommonScaffold(
+            title: 'Page',
+            body: Builder(
+              builder: (context) => ListView(
+                controller: controller,
+                padding: EdgeInsets.only(top: context.appBarInset),
+                children: [_rows()],
+              ),
+            ),
+          ),
+          style,
+        ),
+      );
+      controller.jumpTo(600);
+      await tester.pump();
+      final scrollable = tester.state(find.byType(Scrollable));
+
+      style.value = _miuix;
+      await tester.pump();
+      expect(_barHeight(tester), 56);
+      await tester.pumpAndSettle();
+      expect(tester.state(find.byType(Scrollable)), same(scrollable));
+      expect(controller.offset, 600);
+
+      style.value = _material;
+      await tester.pumpAndSettle();
+      expect(_header, findsNothing);
+      expect(tester.state(find.byType(Scrollable)), same(scrollable));
+      expect(controller.offset, 600);
     });
 
     testWidgets('stays expanded for a body held clear of the bar', (
