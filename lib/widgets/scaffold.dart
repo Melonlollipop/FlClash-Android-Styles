@@ -624,22 +624,29 @@ class CommonScaffoldState extends State<CommonScaffold> {
                 ),
               );
             }
-            return Stack(
-              alignment: Alignment.bottomCenter,
-              clipBehavior: Clip.none,
-              children: [
-                _buildFloatingHeader(
-                  _buildAppBarWrap(
-                    _buildToolbar(
-                      state,
-                      backAction,
-                      form,
-                      primaryAction: primaryAction,
+            // The slot keeps the expanded height so the body does not jump.
+            return Align(
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                height: MediaQuery.paddingOf(context).top + pageToolbarHeight,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  clipBehavior: Clip.none,
+                  children: [
+                    _buildFloatingHeader(
+                      _buildAppBarWrap(
+                        _buildToolbar(
+                          state,
+                          backAction,
+                          form,
+                          primaryAction: primaryAction,
+                        ),
+                      ),
                     ),
-                  ),
+                    loading,
+                  ],
                 ),
-                loading,
-              ],
+              ),
             );
           },
         ),

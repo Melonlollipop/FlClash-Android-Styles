@@ -718,7 +718,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(_header, findsNothing);
       expect(find.byType(TextField), findsOneWidget);
-      expect(tester.getSize(find.byType(AppBar)).height, 96);
+      expect(tester.getSize(find.byType(AppBar)).height, 64);
 
       for (final type in [SheetType.bottomSheet, SheetType.sideSheet]) {
         await tester.pumpWidget(
@@ -760,6 +760,44 @@ void main() {
       expect(_header, findsNothing);
       expect(find.text('Page'), findsOneWidget);
       expect(inset, 64);
+    });
+
+    testWidgets('a search bar takes the upstream height in the title slot', (
+      tester,
+    ) async {
+      late double inset;
+      await tester.pumpWidget(
+        _styled(
+          MediaQuery(
+            data: const MediaQueryData(
+              size: Size(800, 600),
+              padding: EdgeInsets.only(top: 24),
+            ),
+            child: CommonScaffold(
+              title: 'Page',
+              isLoading: true,
+              searchState: AppBarSearchState(onSearch: (_) {}),
+              body: Builder(
+                builder: (context) {
+                  inset = context.appBarInset;
+                  return const SizedBox.expand();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byGlyph(AppGlyphs.search));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(TextField), findsOneWidget);
+      expect(tester.getRect(find.byType(AppBar)).bottom, 24 + 64);
+      expect(
+        tester.getRect(find.byType(LinearProgressIndicator)).bottom,
+        24 + 64,
+      );
+      expect(inset, 24 + 96);
     });
 
     testWidgets('the expanded bar grows with the text scale', (tester) async {
