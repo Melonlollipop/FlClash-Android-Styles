@@ -335,7 +335,7 @@ class MiniScreen extends StatelessWidget {
       return (
         tint.withValues(alpha: 0.1),
         colorScheme.primary,
-        colorScheme.onSurfaceVariant,
+        colorScheme.onSurface,
       );
     }
     if (!interfaceStyle.isMiuix) {
@@ -349,7 +349,7 @@ class MiniScreen extends StatelessWidget {
       return (
         colorScheme.primary.withValues(alpha: 0.15),
         colorScheme.primary,
-        colorScheme.onSurfaceVariant,
+        colorScheme.onSurface,
       );
     }
     return (

@@ -542,7 +542,7 @@ void main() {
       expect(colorsIn(tester, solidBar), [
         colorScheme.primary.withValues(alpha: 0.15),
         colorScheme.primary,
-        ...unselected,
+        ...List.filled(3, colorScheme.onSurface),
       ]);
 
       await pumpScreen(tester, floatingBar: false, interfaceStyle: miuix);
@@ -568,7 +568,7 @@ void main() {
       expect(colorsIn(tester, glassBar), [
         Colors.black.withValues(alpha: 0.1),
         colorScheme.primary,
-        ...unselected,
+        ...List.filled(3, colorScheme.onSurface),
       ]);
 
       await pumpScreen(tester, floatingBar: false, interfaceStyle: glass);
