@@ -20,15 +20,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart' show Override;
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
-InterfaceStyleTheme _androidInterfaceStyle(Ref ref) {
-  final theme = ref.watch(themeSettingProvider);
-  return InterfaceStyleTheme(
-    style: theme.interfaceStyle,
-    barBlur: theme.barBlur,
-    liquidGlass: theme.liquidGlass,
-    predictiveBack: theme.predictiveBack,
-  );
-}
+InterfaceStyleTheme _androidInterfaceStyle(Ref ref) =>
+    interfaceStyleThemeOf(ref.watch(themeSettingProvider), isAndroid: true);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
