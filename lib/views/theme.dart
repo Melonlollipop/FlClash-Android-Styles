@@ -606,34 +606,31 @@ class _PureBlackItem extends ConsumerWidget {
       ),
     );
     return SliverToBoxAdapter(
-      child: DisabledMask(
-        status: !enabled,
-        child: PreviewChoiceGroup<bool>(
-          info: Info(
-            label: appLocalizations.pureBlackMode,
-            glyph: AppGlyphs.pureBlack,
-          ),
-          value: pureBlack,
-          choices: [
-            PreviewChoice(
-              value: false,
-              label: appLocalizations.standard,
-              pictogram: preview(false),
-            ),
-            PreviewChoice(
-              value: true,
-              label: appLocalizations.pureBlack,
-              pictogram: preview(true),
-            ),
-          ],
-          onChanged: enabled
-              ? (value) {
-                  ref
-                      .read(themeSettingProvider.notifier)
-                      .update((state) => state.copyWith(pureBlack: value));
-                }
-              : null,
+      child: PreviewChoiceGroup<bool>(
+        info: Info(
+          label: appLocalizations.pureBlackMode,
+          glyph: AppGlyphs.pureBlack,
         ),
+        value: pureBlack,
+        choices: [
+          PreviewChoice(
+            value: false,
+            label: appLocalizations.standard,
+            pictogram: preview(false),
+          ),
+          PreviewChoice(
+            value: true,
+            label: appLocalizations.pureBlack,
+            pictogram: preview(true),
+          ),
+        ],
+        onChanged: enabled
+            ? (value) {
+                ref
+                    .read(themeSettingProvider.notifier)
+                    .update((state) => state.copyWith(pureBlack: value));
+              }
+            : null,
       ),
     );
   }
@@ -735,22 +732,19 @@ class _InterfaceEffectsItem extends ConsumerWidget {
                   select: (state) => state.barBlur,
                   update: (state, value) => state.copyWith(barBlur: value),
                 ),
-                DisabledMask(
-                  status: !floatingBar,
-                  child: ListItem.toggle(
-                    title: Text(appLocalizations.liquidGlass),
-                    subtitle: Text(appLocalizations.liquidGlassDesc),
-                    value: liquidGlass,
-                    onChanged: floatingBar
-                        ? (value) {
-                            ref
-                                .read(themeSettingProvider.notifier)
-                                .update(
-                                  (state) => state.copyWith(liquidGlass: value),
-                                );
-                          }
-                        : null,
-                  ),
+                ListItem.toggle(
+                  title: Text(appLocalizations.liquidGlass),
+                  subtitle: Text(appLocalizations.liquidGlassDesc),
+                  value: liquidGlass,
+                  onChanged: floatingBar
+                      ? (value) {
+                          ref
+                              .read(themeSettingProvider.notifier)
+                              .update(
+                                (state) => state.copyWith(liquidGlass: value),
+                              );
+                        }
+                      : null,
                 ),
                 _themeToggle(
                   title: (l) => l.predictiveBack,

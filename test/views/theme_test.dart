@@ -75,9 +75,23 @@ void main() {
     );
   }
 
-  DisabledMask maskAround(WidgetTester tester, String label) {
+  CommonCard choiceCard(WidgetTester tester, String label) {
     return tester.widget(
-      find.ancestor(of: find.text(label), matching: find.byType(DisabledMask)),
+      find.ancestor(of: find.text(label), matching: find.byType(CommonCard)),
+    );
+  }
+
+  Finder switchIn(String label) {
+    return find.descendant(
+      of: find.ancestor(of: find.text(label), matching: find.byType(ListTile)),
+      matching: find.byType(CommonSwitch),
+    );
+  }
+
+  Finder colorFilterAround(String label) {
+    return find.ancestor(
+      of: find.text(label),
+      matching: find.byType(ColorFiltered),
     );
   }
 
@@ -280,7 +294,7 @@ void main() {
 
       expect(livePreview(tester).interfaceStyle, const InterfaceStyleTheme());
       expect(find.byType(ColorSchemeBox), findsWidgets);
-      expect(maskAround(tester, 'Pure black').status, isFalse);
+      expect(choiceCard(tester, 'Pure black').onPressed, isNotNull);
     });
   });
 
@@ -398,7 +412,8 @@ void main() {
 
       await pumpThemeView(tester, isAndroid: true);
 
-      expect(maskAround(tester, 'Pure black').status, isTrue);
+      expect(choiceCard(tester, 'Pure black').onPressed, isNull);
+      expect(colorFilterAround('Pure black'), findsNothing);
       await tester.tap(find.text('Pure black'));
       await tester.pumpAndSettle();
       expect(readTheme().pureBlack, isFalse);
@@ -406,7 +421,7 @@ void main() {
       updateTheme((state) => state.copyWith(miuixMonet: true));
       await tester.pumpAndSettle();
 
-      expect(maskAround(tester, 'Pure black').status, isFalse);
+      expect(choiceCard(tester, 'Pure black').onPressed, isNotNull);
       await tester.tap(find.text('Pure black'));
       await tester.pumpAndSettle();
       expect(readTheme().pureBlack, isTrue);
@@ -439,16 +454,19 @@ void main() {
           .update((state) => state.copyWith(floatingNavigationBar: false));
 
       await pumpThemeView(tester, isAndroid: true);
+      final glassSwitch = switchIn('Liquid glass');
 
-      expect(maskAround(tester, 'Liquid glass').status, isTrue);
+      expect(tester.widget<CommonSwitch>(glassSwitch).onChanged, isNull);
+      expect(colorFilterAround('Liquid glass'), findsNothing);
       await tester.tap(find.text('Liquid glass'));
+      await tester.tap(glassSwitch);
       await tester.pumpAndSettle();
       expect(readTheme().liquidGlass, isFalse);
 
       await tester.tap(find.text('Floating'));
       await tester.pumpAndSettle();
 
-      expect(maskAround(tester, 'Liquid glass').status, isFalse);
+      expect(tester.widget<CommonSwitch>(glassSwitch).onChanged, isNotNull);
       await tester.tap(find.text('Liquid glass'));
       await tester.pumpAndSettle();
       expect(readTheme().liquidGlass, isTrue);
