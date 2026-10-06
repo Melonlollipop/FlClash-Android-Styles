@@ -196,10 +196,16 @@ class LargeTitleHeader extends StatefulWidget {
   /// How far the large title reaches below the row, the distance the page
   /// scrolls to collapse it.
   static double titleExtentOf(BuildContext context) =>
-      MediaQuery.textScalerOf(context).scale(_titleSize) * _titleLineHeight;
+      _titleExtentFor(MediaQuery.textScalerOf(context));
 
   static double expandedHeightOf(BuildContext context) =>
-      barHeight + titleExtentOf(context) + _titleGap;
+      expandedHeightFor(MediaQuery.textScalerOf(context));
+
+  static double expandedHeightFor(TextScaler textScaler) =>
+      barHeight + _titleExtentFor(textScaler) + _titleGap;
+
+  static double _titleExtentFor(TextScaler textScaler) =>
+      textScaler.scale(_titleSize) * _titleLineHeight;
 
   @override
   State<LargeTitleHeader> createState() => _LargeTitleHeaderState();
