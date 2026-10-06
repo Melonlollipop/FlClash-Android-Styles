@@ -115,7 +115,7 @@
   "safeModeAppTitle": "{appName}（セーフモード）",
   "project": "プロジェクト",
   "core": "コア",
-  "tabAnimation": "タブアニメーション",
+  "tabAnimation": "ページ切り替えアニメーション",
   "desc": "ClashMetaベースのマルチプラットフォーム対応プロキシクライアント。シンプルで使いやすく、オープンソースで広告もありません。",
   "startVpn": "VPNを起動しています…",
   "stopVpn": "VPNを停止しています…",

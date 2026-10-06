@@ -29,9 +29,16 @@ class DynamicColor extends _$DynamicColor {
 @riverpod
 InterfaceStyleTheme interfaceStyleTheme(Ref ref) {
   final isAndroid = system.isAndroid;
+  final pageAnimation = ref.watch(
+    appSettingProvider.select((state) => state.tabAnimation),
+  );
   return ref.watch(
     themeSettingProvider.select(
-      (state) => interfaceStyleThemeOf(state, isAndroid: isAndroid),
+      (state) => interfaceStyleThemeOf(
+        state,
+        isAndroid: isAndroid,
+        pageAnimation: pageAnimation,
+      ),
     ),
   );
 }
@@ -39,9 +46,10 @@ InterfaceStyleTheme interfaceStyleTheme(Ref ref) {
 InterfaceStyleTheme interfaceStyleThemeOf(
   ThemeProps props, {
   required bool isAndroid,
+  TabAnimation pageAnimation = TabAnimation.slide,
 }) {
   if (!isAndroid) {
-    return const InterfaceStyleTheme();
+    return InterfaceStyleTheme(pageAnimation: pageAnimation);
   }
   return InterfaceStyleTheme(
     style: props.interfaceStyle,
@@ -49,6 +57,7 @@ InterfaceStyleTheme interfaceStyleThemeOf(
     barBlur: props.barBlur,
     liquidGlass: props.liquidGlass,
     predictiveBack: props.predictiveBack,
+    pageAnimation: pageAnimation,
   );
 }
 

@@ -33,6 +33,33 @@ void main() {
     expect(container.read(interfaceStyleThemeProvider).liquidGlass, isFalse);
   });
 
+  test('page animation follows the tab animation on every platform', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    expect(
+      container.read(interfaceStyleThemeProvider).pageAnimation,
+      TabAnimation.slide,
+    );
+
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(tabAnimation: TabAnimation.fade));
+    expect(
+      container.read(interfaceStyleThemeProvider).pageAnimation,
+      TabAnimation.fade,
+    );
+    for (final isAndroid in [true, false]) {
+      expect(
+        interfaceStyleThemeOf(
+          const ThemeProps(predictiveBack: false),
+          isAndroid: isAndroid,
+          pageAnimation: TabAnimation.fade,
+        ),
+        const InterfaceStyleTheme(pageAnimation: TabAnimation.fade),
+      );
+    }
+  });
+
   test('Android carries each interface setting into the extension', () {
     const base = ThemeProps();
     final cases = [

@@ -596,7 +596,7 @@ void main() {
       expect(tester.getTopLeft(find.text('Flat')).dx, 16);
     });
 
-    testWidgets('a style switch keeps the rows and their open container', (
+    testWidgets('a style switch keeps the rows and their scroll offset', (
       tester,
     ) async {
       final style = ValueNotifier(_material);
@@ -629,7 +629,6 @@ void main() {
       final scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
       scrollable.position.jumpTo(60);
       await tester.pump();
-      final openContainer = tester.state(find.byType(OpenContainer<dynamic>));
 
       for (final next in [_miuix, _material]) {
         style.value = next;
@@ -641,10 +640,6 @@ void main() {
         );
         expect(tester.state(find.byType(Scrollable)), same(scrollable));
         expect(scrollable.position.pixels, 60);
-        expect(
-          tester.state(find.byType(OpenContainer<dynamic>)),
-          same(openContainer),
-        );
       }
     });
   });

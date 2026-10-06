@@ -1230,7 +1230,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "systemApp": MessageLookupByLibrary.simpleMessage("システムアプリ"),
     "systemProxy": MessageLookupByLibrary.simpleMessage("システムプロキシ"),
     "tab": MessageLookupByLibrary.simpleMessage("タブ"),
-    "tabAnimation": MessageLookupByLibrary.simpleMessage("タブアニメーション"),
+    "tabAnimation": MessageLookupByLibrary.simpleMessage("ページ切り替えアニメーション"),
     "tapToAuthorize": MessageLookupByLibrary.simpleMessage("タップして許可"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP同時接続"),
     "testInterval": MessageLookupByLibrary.simpleMessage("テスト間隔"),

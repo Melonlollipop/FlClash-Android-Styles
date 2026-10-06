@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:animations/animations.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/widgets/drag_back.dart';
 import 'package:fl_clash/widgets/keyboard_inset_hold.dart';
 import 'package:flutter/scheduler.dart';
@@ -115,6 +116,29 @@ class CommonRoute<T> extends PageRoute<T> with DragBackRouteMixin<T> {
   bool get maintainState => true;
 
   @override
+  DelegatedTransitionBuilder? get delegatedTransition => _slideRouteBelow;
+
+  static Widget? _slideRouteBelow(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    bool allowSnapshotting,
+    Widget? child,
+  ) {
+    if (context.interfaceStyle.pageAnimation == TabAnimation.fade ||
+        isHeldByBackGesture(context)) {
+      return child;
+    }
+    return CommonPageTransition.delegatedTransition(
+      context,
+      animation,
+      secondaryAnimation,
+      allowSnapshotting,
+      child,
+    );
+  }
+
+  @override
   Widget buildPage(
     BuildContext context,
     Animation<double> animation,
@@ -137,16 +161,22 @@ class CommonRoute<T> extends PageRoute<T> with DragBackRouteMixin<T> {
     return dragBackDetector(
       isDragBackActive
           ? dragBackSlide(context, animation, child)
-          : SharedAxisTransition(
-              animation: animation,
-              secondaryAnimation: dragBackSecondaryAnimation(
-                context,
-                secondaryAnimation,
+          : switch (context.interfaceStyle.pageAnimation) {
+              TabAnimation.slide => CommonPageTransition(
+                context: context,
+                primaryRouteAnimation: animation,
+                secondaryRouteAnimation: dragBackSecondaryAnimation(
+                  context,
+                  secondaryAnimation,
+                ),
+                linearTransition: popGestureInProgress,
+                child: child,
               ),
-              transitionType: SharedAxisTransitionType.horizontal,
-              fillColor: context.colorScheme.surface,
-              child: child,
-            ),
+              TabAnimation.fade => FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            },
     );
   }
 

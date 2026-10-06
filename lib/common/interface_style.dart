@@ -10,6 +10,7 @@ class InterfaceStyleTheme extends ThemeExtension<InterfaceStyleTheme> {
     this.barBlur = false,
     this.liquidGlass = false,
     this.predictiveBack = false,
+    this.pageAnimation = TabAnimation.slide,
   });
 
   final InterfaceStyle style;
@@ -19,6 +20,7 @@ class InterfaceStyleTheme extends ThemeExtension<InterfaceStyleTheme> {
   final bool barBlur;
   final bool liquidGlass;
   final bool predictiveBack;
+  final TabAnimation pageAnimation;
 
   bool get isMiuix => style == InterfaceStyle.miuix;
 
@@ -29,6 +31,7 @@ class InterfaceStyleTheme extends ThemeExtension<InterfaceStyleTheme> {
     bool? barBlur,
     bool? liquidGlass,
     bool? predictiveBack,
+    TabAnimation? pageAnimation,
   }) {
     return InterfaceStyleTheme(
       style: style ?? this.style,
@@ -36,6 +39,7 @@ class InterfaceStyleTheme extends ThemeExtension<InterfaceStyleTheme> {
       barBlur: barBlur ?? this.barBlur,
       liquidGlass: liquidGlass ?? this.liquidGlass,
       predictiveBack: predictiveBack ?? this.predictiveBack,
+      pageAnimation: pageAnimation ?? this.pageAnimation,
     );
   }
 
@@ -54,12 +58,19 @@ class InterfaceStyleTheme extends ThemeExtension<InterfaceStyleTheme> {
         other.miuixMonet == miuixMonet &&
         other.barBlur == barBlur &&
         other.liquidGlass == liquidGlass &&
-        other.predictiveBack == predictiveBack;
+        other.predictiveBack == predictiveBack &&
+        other.pageAnimation == pageAnimation;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(style, miuixMonet, barBlur, liquidGlass, predictiveBack);
+  int get hashCode => Object.hash(
+    style,
+    miuixMonet,
+    barBlur,
+    liquidGlass,
+    predictiveBack,
+    pageAnimation,
+  );
 }
 
 extension InterfaceStyleContext on BuildContext {

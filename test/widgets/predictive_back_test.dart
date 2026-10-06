@@ -194,6 +194,15 @@ void main() {
       expect(_opacity(tester, 'first'), 1);
     });
 
+    testWidgets('keeps the home page it uncovers whole too', (tester) async {
+      await _pumpRoutes(tester, [_commonRoute('top')]);
+
+      expect(await _start(tester), isTrue);
+      await _update(tester, 0.3);
+      expect(_left(tester, 'home'), 0);
+      expect(_left(tester, 'top'), _slid(0.3));
+    });
+
     testWidgets('slides toward the reading end in right-to-left text', (
       tester,
     ) async {

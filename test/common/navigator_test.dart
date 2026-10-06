@@ -1,4 +1,6 @@
+import 'package:fl_clash/common/interface_style.dart';
 import 'package:fl_clash/common/navigator.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,7 +55,7 @@ void main() {
       expect(find.text('pushed page'), findsOneWidget);
     });
 
-    testWidgets('uses the shared-axis route on a mobile view', (tester) async {
+    testWidgets('uses the page route on a mobile view', (tester) async {
       setViewWidth(400);
       await pumpHost(tester);
 
@@ -75,6 +77,72 @@ void main() {
 
       expect(find.text('pushed page'), findsNothing);
       expect(find.text('open'), findsOneWidget);
+    });
+  });
+
+  group('page animation on a mobile view', () {
+    Future<void> pushHalfway(
+      WidgetTester tester,
+      TabAnimation pageAnimation,
+    ) async {
+      setViewWidth(400);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: ThemeData().withInterfaceStyle(
+              InterfaceStyleTheme(pageAnimation: pageAnimation),
+            ),
+            home: Builder(
+              builder: (context) => Scaffold(
+                key: const ValueKey('home'),
+                body: TextButton(
+                  onPressed: () => BaseNavigator.push(
+                    context,
+                    const Scaffold(key: ValueKey('page'), body: Text('page')),
+                  ),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+    }
+
+    double left(WidgetTester tester, String key) {
+      return tester.getTopLeft(find.byKey(ValueKey(key))).dx;
+    }
+
+    testWidgets('slides the page in and the page below aside', (tester) async {
+      await pushHalfway(tester, TabAnimation.slide);
+
+      expect(find.byType(CommonPageTransition), findsOneWidget);
+      expect(left(tester, 'page'), inExclusiveRange(0, 800));
+      expect(left(tester, 'home'), inExclusiveRange(-800 / 3, 0));
+
+      await tester.pumpAndSettle();
+      expect(left(tester, 'page'), 0);
+    });
+
+    testWidgets('fades the page in over a still page below', (tester) async {
+      await pushHalfway(tester, TabAnimation.fade);
+
+      final fade = tester.widget<FadeTransition>(
+        find
+            .ancestor(
+              of: find.byKey(const ValueKey('page')),
+              matching: find.byType(FadeTransition),
+            )
+            .first,
+      );
+      expect(find.byType(CommonPageTransition), findsNothing);
+      expect(fade.opacity.value, inExclusiveRange(0, 1));
+      expect(left(tester, 'page'), 0);
+      expect(left(tester, 'home'), 0);
     });
   });
 
@@ -207,7 +275,7 @@ void main() {
       );
     });
 
-    test('mobile route uses the longer shared-axis duration', () {
+    test('mobile route uses the longer page duration', () {
       final route = CommonRoute<void>(builder: (_) => const SizedBox());
 
       expect(route.barrierColor, isNull);
