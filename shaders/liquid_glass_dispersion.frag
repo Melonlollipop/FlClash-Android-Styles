@@ -27,8 +27,20 @@ out vec4 fragColor;
 
 #include "rounded_rect_sdf.glsl"
 
+vec4 texelAt(vec2 centre) {
+  return texture(content, centre / inputSize);
+}
+
+// Impeller binds the filter input with a nearest sampler, where Skia's
+// RenderEffect filters it linearly.
 vec4 contentAt(vec2 coord) {
-  return texture(content, coord / inputSize);
+  vec2 p = coord - 0.5;
+  vec2 f = fract(p);
+  vec2 b = floor(p) + 0.5;
+  return mix(
+      mix(texelAt(b), texelAt(b + vec2(1.0, 0.0)), f.x),
+      mix(texelAt(b + vec2(0.0, 1.0)), texelAt(b + vec2(1.0, 1.0)), f.x),
+      f.y);
 }
 
 float circleMap(float x) {
@@ -37,13 +49,16 @@ float circleMap(float x) {
 
 void main() {
   vec2 coord = FlutterFragCoord().xy;
+  // A lens at a sub-pixel offset puts coord off the texel grid; refracting
+  // from the texel a nearest read returns keeps the unbent interior sharp.
+  vec2 texel = floor(coord) + 0.5;
   vec2 halfSize = size * 0.5;
   vec2 centeredCoord = (coord + offset) - halfSize;
   float radius = radiusAt(centeredCoord, cornerRadii);
 
   float sd = sdRoundedRect(centeredCoord, halfSize, radius);
   if (-sd >= refractionHeight) {
-    fragColor = contentAt(coord);
+    fragColor = texelAt(texel);
     return;
   }
   sd = min(sd, 0.0);
@@ -52,7 +67,7 @@ void main() {
   float gradRadius = min(radius * 1.5, min(halfSize.x, halfSize.y));
   vec2 grad = normalize(gradSdRoundedRect(centeredCoord, halfSize, gradRadius));
 
-  vec2 refractedCoord = coord + d * grad;
+  vec2 refractedCoord = texel + d * grad;
   float dispersionIntensity =
       (centeredCoord.x * centeredCoord.y) / (halfSize.x * halfSize.y);
   vec2 dispersedCoord = d * grad * dispersionIntensity;
