@@ -232,6 +232,38 @@ void main() {
       expect(_toggleValue(tester), isTrue);
     });
 
+    testWidgets('reports the height it shrink-wraps to in both styles', (
+      tester,
+    ) async {
+      for (final style in [_material, _miuix]) {
+        late double reported;
+        await tester.pumpWidget(
+          _styled(
+            Center(
+              child: Builder(
+                builder: (context) {
+                  reported = CommonSwitch.shrinkWrappedHeightOf(context);
+                  return CommonSwitch(
+                    value: false,
+                    onChanged: (_) {},
+                    padding: EdgeInsets.zero,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  );
+                },
+              ),
+            ),
+            style: style,
+          ),
+        );
+        expect(
+          tester.getSize(find.byType(CommonSwitch)).height,
+          reported,
+          reason: '${style.style}',
+        );
+      }
+      expect(tester.getSize(_track).height, 28);
+    });
+
     testWidgets('swells its thumb while pressed', (tester) async {
       await tester.pumpWidget(_styled(const _Toggle()));
 

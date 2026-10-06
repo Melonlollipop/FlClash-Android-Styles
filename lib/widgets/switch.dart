@@ -40,6 +40,14 @@ class CommonSwitch extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final MaterialTapTargetSize? materialTapTargetSize;
 
+  /// A shrink-wrapped Material switch still lays out 4 above and below its
+  /// track; the Miuix capsule lays out only its track.
+  static double shrinkWrappedHeightOf(BuildContext context) {
+    return context.interfaceStyle.isMiuix
+        ? _trackSize.height
+        : kMinInteractiveDimension - 8;
+  }
+
   @override
   Widget build(BuildContext context) {
     final style = context.interfaceStyle;
