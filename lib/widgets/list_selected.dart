@@ -68,6 +68,7 @@ class DecorationListItem extends StatelessWidget {
   final VoidCallback? onPressed;
   final double? minVerticalPadding;
   final bool invalid;
+  final bool enabled;
 
   const DecorationListItem({
     super.key,
@@ -81,6 +82,7 @@ class DecorationListItem extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.invalid = false,
+    this.enabled = true,
   });
 
   @override
@@ -115,6 +117,7 @@ class DecorationListItem extends StatelessWidget {
         builder: (context, constraints) {
           final isInfinite = constraints.maxHeight >= double.infinity;
           final tile = ListTile(
+            enabled: enabled,
             leading: leading,
             contentPadding:
                 contentPadding ?? const EdgeInsets.only(right: 16, left: 16),

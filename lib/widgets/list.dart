@@ -374,6 +374,7 @@ class ListItem<T> extends StatelessWidget {
     void Function()? onTap,
     Widget? trailing,
     Widget? leading,
+    bool enabled = true,
   }) {
     if (position != null) {
       // OpenContainer reparents the closed tile out of the section's provider.
@@ -387,12 +388,14 @@ class ListItem<T> extends StatelessWidget {
           contentPadding: padding,
           horizontalTitleGap: horizontalTitleGap,
           onPressed: onTap,
+          enabled: enabled,
         ),
       );
     }
     final isMiuix = context.interfaceStyle.isMiuix;
     return ListTile(
       key: key,
+      enabled: enabled,
       dense: dense,
       visualDensity: visualDensity,
       tileColor: color,
@@ -534,6 +537,7 @@ class ListItem<T> extends StatelessWidget {
         return _buildListTile(
           context,
           position: position,
+          enabled: toggleAction.onChanged != null,
           onTap: toggleAction.onChanged == null
               ? null
               : () {

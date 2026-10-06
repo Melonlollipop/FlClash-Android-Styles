@@ -512,6 +512,43 @@ void main() {
       expect(tile.minTileHeight, 54);
     });
 
+    testWidgets('a toggle without onChanged is a disabled row', (tester) async {
+      Widget toggles({required bool grouped}) {
+        final items = [
+          ListItem.toggle(title: const Text('Off'), value: false),
+          ListItem.toggle(
+            title: const Text('On'),
+            value: true,
+            onChanged: (_) {},
+          ),
+        ];
+        return ListView(
+          children: grouped
+              ? [generateSectionV3(title: 'Section', items: items)]
+              : items,
+        );
+      }
+
+      bool enabledOf(String label) => tester
+          .widget<ListTile>(
+            find.ancestor(
+              of: find.text(label),
+              matching: find.byType(ListTile),
+            ),
+          )
+          .enabled;
+
+      for (final style in [_miuix, _material]) {
+        for (final grouped in [true, false]) {
+          await tester.pumpWidget(
+            _styled(toggles(grouped: grouped), style: style),
+          );
+          expect(enabledOf('Off'), isFalse);
+          expect(enabledOf('On'), isTrue);
+        }
+      }
+    });
+
     testWidgets('section titles take the Monet primary and dark variant', (
       tester,
     ) async {
