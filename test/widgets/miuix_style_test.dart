@@ -215,6 +215,23 @@ void main() {
       );
     });
 
+    testWidgets('takes taps across its padded box', (tester) async {
+      await tester.pumpWidget(_styled(const _Toggle()));
+      final box = tester.getRect(find.byType(CommonSwitch));
+
+      await tester.tapAt(Offset(box.center.dx, box.top + 4));
+      await tester.pumpAndSettle();
+      expect(_toggleValue(tester), isTrue);
+
+      await tester.tapAt(Offset(box.left + 2, box.center.dy));
+      await tester.pumpAndSettle();
+      expect(_toggleValue(tester), isFalse);
+
+      await tester.tapAt(Offset(box.center.dx, box.bottom - 4));
+      await tester.pumpAndSettle();
+      expect(_toggleValue(tester), isTrue);
+    });
+
     testWidgets('swells its thumb while pressed', (tester) async {
       await tester.pumpWidget(_styled(const _Toggle()));
 

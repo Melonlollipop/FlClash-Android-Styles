@@ -253,6 +253,7 @@ class _MiuixSwitchState extends State<_MiuixSwitch>
         onShowFocusHighlight: (focused) => setState(() => _focused = focused),
         onShowHoverHighlight: _setHovered,
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           excludeFromSemantics: !_enabled,
           onTap: _enabled ? _toggle : null,
           onTapDown: _enabled ? (_) => _setPressed(true) : null,
