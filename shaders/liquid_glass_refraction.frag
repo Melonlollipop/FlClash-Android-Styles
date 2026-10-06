@@ -27,12 +27,7 @@ out vec4 fragColor;
 #include "rounded_rect_sdf.glsl"
 
 vec4 contentAt(vec2 coord) {
-  vec2 uv = coord / inputSize;
-  // Only engines that still store GLES offscreen targets bottom-up need this.
-#if defined(IMPELLER_TARGET_OPENGLES) && !defined(IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED)
-  uv.y = 1.0 - uv.y;
-#endif
-  return texture(content, uv);
+  return texture(content, coord / inputSize);
 }
 
 float circleMap(float x) {
