@@ -80,7 +80,7 @@ class _QuickSwitchCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Switch(
+                    CommonSwitch(
                       padding: EdgeInsets.zero,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       value: value,
