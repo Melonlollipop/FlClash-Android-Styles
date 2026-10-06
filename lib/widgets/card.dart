@@ -168,12 +168,14 @@ class CommonCard extends StatelessWidget {
   Color? _buildBackgroundColor(BuildContext context) {
     final colorScheme = context.colorScheme;
     if (context.interfaceStyle.isMiuix) {
-      return isSelected
-          ? Color.alphaBlend(
-              colorScheme.primary.opacity12,
-              colorScheme.surfaceContainer,
-            )
+      // A bottom sheet paints the card colour itself; compose-miuix sets the
+      // cards on one in secondaryContainer.
+      final base = context.isInBottomSheet
+          ? colorScheme.secondaryContainer
           : colorScheme.surfaceContainer;
+      return isSelected
+          ? Color.alphaBlend(colorScheme.primary.opacity12, base)
+          : base;
     }
     if (type == CommonCardType.filled) {
       if (isSelected) {

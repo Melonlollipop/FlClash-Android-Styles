@@ -391,6 +391,35 @@ void main() {
       expect(filled.shape!.resolve({}), AppShape.all(AppCorner.sm));
     });
 
+    testWidgets('Miuix cards on a bottom sheet stand off the sheet', (
+      tester,
+    ) async {
+      Widget onSheet(SheetType type) => _styled(
+        SheetProvider(
+          type: type,
+          child: CommonScaffold(title: 'Sheet', body: cards()),
+        ),
+      );
+
+      await tester.pumpWidget(onSheet(SheetType.bottomSheet));
+      final plain = styleOf(tester, 'plain');
+      expect(plain.backgroundColor!.resolve({}), _light.secondaryContainer);
+      expect(plain.side!.resolve({}), BorderSide.none);
+      expect(
+        styleOf(tester, 'selected').backgroundColor!.resolve({}),
+        Color.alphaBlend(
+          _light.primary.withValues(alpha: 0.12),
+          _light.secondaryContainer,
+        ),
+      );
+
+      await tester.pumpWidget(onSheet(SheetType.sideSheet));
+      expect(
+        styleOf(tester, 'plain').backgroundColor!.resolve({}),
+        _light.surfaceContainer,
+      );
+    });
+
     testWidgets('Material cards keep their outline and corners', (
       tester,
     ) async {
