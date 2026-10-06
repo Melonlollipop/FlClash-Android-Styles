@@ -168,8 +168,7 @@ class CommonCard extends StatelessWidget {
   Color? _buildBackgroundColor(BuildContext context) {
     final colorScheme = context.colorScheme;
     if (context.interfaceStyle.isMiuix) {
-      // A bottom sheet paints the card colour itself; compose-miuix sets the
-      // cards on one in secondaryContainer.
+      // A bottom sheet is as white as a card, so compose-miuix sets cards apart.
       final base = context.isInBottomSheet
           ? colorScheme.secondaryContainer
           : colorScheme.surfaceContainer;

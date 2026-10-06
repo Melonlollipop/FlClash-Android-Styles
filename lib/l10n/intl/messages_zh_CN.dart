@@ -1091,7 +1091,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "systemApp": MessageLookupByLibrary.simpleMessage("系统应用"),
     "systemProxy": MessageLookupByLibrary.simpleMessage("系统代理"),
     "tab": MessageLookupByLibrary.simpleMessage("标签页"),
-    "tabAnimation": MessageLookupByLibrary.simpleMessage("选项卡动画"),
+    "tabAnimation": MessageLookupByLibrary.simpleMessage("页面切换动画"),
     "tapToAuthorize": MessageLookupByLibrary.simpleMessage("点击授权"),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP并发"),
     "testInterval": MessageLookupByLibrary.simpleMessage("测试间隔"),

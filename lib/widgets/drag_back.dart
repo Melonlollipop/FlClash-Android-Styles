@@ -12,6 +12,13 @@ final Animatable<Offset> _slideTween = Tween<Offset>(
   end: Offset.zero,
 );
 
+/// Whether the route at [context] should stay at rest while a back gesture
+/// slides the route above away, so it shows whole instead of mid-exit.
+bool isHeldByBackGesture(BuildContext context) {
+  return context.interfaceStyle.predictiveBack &&
+      (ModalRoute.of(context)?.popGestureInProgress ?? false);
+}
+
 /// Lets a press anywhere on the route drag it toward the reading end to pop.
 /// A horizontal scrollable, slider or text field under the pointer is deeper
 /// in the hit test, so it wins the arena and keeps the drag.
@@ -42,13 +49,12 @@ mixin DragBackRouteMixin<T> on ModalRoute<T> {
     );
   }
 
-  /// Holds [secondaryAnimation] at rest while a back gesture slides the route
-  /// above away, so this route shows whole behind it instead of mid-exit.
+  /// Holds [secondaryAnimation] at rest while [isHeldByBackGesture].
   Animation<double> dragBackSecondaryAnimation(
     BuildContext context,
     Animation<double> secondaryAnimation,
   ) {
-    if (popGestureInProgress && context.interfaceStyle.predictiveBack) {
+    if (isHeldByBackGesture(context)) {
       return kAlwaysDismissedAnimation;
     }
     return secondaryAnimation;

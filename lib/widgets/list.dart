@@ -8,7 +8,6 @@ import 'package:material_ui/material_ui.dart';
 
 import 'card.dart';
 import 'input.dart';
-import 'open_container.dart';
 import 'scaffold.dart';
 import 'sheet.dart';
 import 'switch.dart';
@@ -377,19 +376,15 @@ class ListItem<T> extends StatelessWidget {
     bool enabled = true,
   }) {
     if (position != null) {
-      // OpenContainer reparents the closed tile out of the section's provider.
-      return ItemPositionProvider(
-        position: position,
-        child: DecorationListItem(
-          leading: leading ?? this.leading,
-          title: title,
-          subtitle: subtitle,
-          trailing: trailing ?? this.trailing,
-          contentPadding: padding,
-          horizontalTitleGap: horizontalTitleGap,
-          onPressed: onTap,
-          enabled: enabled,
-        ),
+      return DecorationListItem(
+        leading: leading ?? this.leading,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing ?? this.trailing,
+        contentPadding: padding,
+        horizontalTitleGap: horizontalTitleGap,
+        onPressed: onTap,
+        enabled: enabled,
       );
     }
     final isMiuix = context.interfaceStyle.isMiuix;
@@ -443,18 +438,13 @@ class ListItem<T> extends StatelessWidget {
             },
           );
         }
-        return OpenContainer<dynamic>(
-          closedBuilder: (context, action) {
-            return _buildListTile(
-              context,
-              position: position,
-              trailing: chevron,
-              onTap: action,
-            );
-          },
-          onClosed: onChanged,
-          openBuilder: (_, action) {
-            return child;
+        return _buildListTile(
+          context,
+          position: position,
+          trailing: chevron,
+          onTap: () async {
+            final result = await BaseNavigator.push<dynamic>(context, child);
+            onChanged?.call(result);
           },
         );
       case final _NextAction nextDelegate:

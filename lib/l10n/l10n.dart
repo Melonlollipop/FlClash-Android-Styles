@@ -910,10 +910,10 @@ class AppLocalizations {
     return Intl.message('Core', name: 'core', desc: '', args: []);
   }
 
-  /// `Tab animation`
+  /// `Page transition`
   String get tabAnimation {
     return Intl.message(
-      'Tab animation',
+      'Page transition',
       name: 'tabAnimation',
       desc: '',
       args: [],

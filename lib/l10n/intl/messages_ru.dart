@@ -1521,7 +1521,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "systemApp": MessageLookupByLibrary.simpleMessage("Системные приложения"),
     "systemProxy": MessageLookupByLibrary.simpleMessage("Системный прокси"),
     "tab": MessageLookupByLibrary.simpleMessage("Вкладки"),
-    "tabAnimation": MessageLookupByLibrary.simpleMessage("Анимация вкладок"),
+    "tabAnimation": MessageLookupByLibrary.simpleMessage(
+      "Анимация смены страниц",
+    ),
     "tapToAuthorize": MessageLookupByLibrary.simpleMessage(
       "Нажмите, чтобы разрешить",
     ),

@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:fl_clash/common/navigator.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/models/common.dart';
@@ -107,6 +108,44 @@ void main() {
 
     expect(changedValue, isTrue);
   });
+
+  testWidgets(
+    'ListItem.open pushes its page on a phone and reports the result',
+    (tester) async {
+      final results = <Object?>[];
+      await tester.pumpWidget(
+        TestApp(
+          overrides: [isMobileViewProvider.overrideWithValue(true)],
+          child: Scaffold(
+            body: ListItem.open(
+              title: const Text('Opens'),
+              widget: Builder(
+                builder: (context) => Scaffold(
+                  body: TextButton(
+                    onPressed: () => Navigator.of(context).pop('picked'),
+                    child: const Text('Done'),
+                  ),
+                ),
+              ),
+              onChanged: results.add,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Opens'));
+      await tester.pumpAndSettle();
+      expect(
+        ModalRoute.of(tester.element(find.text('Done'))),
+        isA<CommonRoute<dynamic>>(),
+      );
+
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+      expect(find.text('Done'), findsNothing);
+      expect(results, ['picked']);
+    },
+  );
 
   testWidgets('ListItem.checkbox toggles when tapping the row', (tester) async {
     bool? changedValue;

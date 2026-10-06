@@ -115,7 +115,7 @@
   "safeModeAppTitle": "{appName} (Safe mode)",
   "project": "Project",
   "core": "Core",
-  "tabAnimation": "Tab animation",
+  "tabAnimation": "Page transition",
   "desc": "A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.",
   "startVpn": "Starting VPN…",
   "stopVpn": "Stopping VPN…",
