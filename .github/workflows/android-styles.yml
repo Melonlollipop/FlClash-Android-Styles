@@ -1,0 +1,144 @@
+name: android-styles
+
+on:
+  push:
+    branches:
+      - 'android-styles'
+    paths-ignore:
+      - 'site/**'
+      - '**/*.md'
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: Flutter target platforms
+        type: choice
+        default: android-arm64
+        options:
+          - android-arm64
+          - android-x64
+          - android-arm64,android-x64
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.47.4'
+  GO_VERSION: '1.26.4'
+  NDK_VERSION: r28c
+
+jobs:
+  apk:
+    name: Android APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      TARGET_PLATFORMS: ${{ inputs.platforms || 'android-arm64' }}
+      ANDROID_USER_HOME: /home/runner/.android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: core/go.sum
+
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: android-styles-apk
+          workspaces: plugins/rust_api/rust
+          cache-directories: .dart_tool/hooks_runner
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Setup NDK
+        uses: nttld/setup-ndk@v1
+        id: ndk
+        with:
+          ndk-version: ${{ env.NDK_VERSION }}
+          add-to-path: true
+          link-to-sdk: true
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Use the development signature as the debug key
+        env:
+          DEV_KEYSTORE: ${{ secrets.DEV_KEYSTORE }}
+          DEV_KEY_ALIAS: ${{ secrets.DEV_KEY_ALIAS }}
+          DEV_STORE_PASSWORD: ${{ secrets.DEV_STORE_PASSWORD }}
+          DEV_KEY_PASSWORD: ${{ secrets.DEV_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DEV_KEYSTORE" ]; then
+            echo 'DEV_KEYSTORE is not set; the APK keeps a runner-generated debug signature.'
+            exit 0
+          fi
+          echo "$DEV_KEYSTORE" | base64 --decode > "$RUNNER_TEMP/dev.jks"
+          mkdir -p "$ANDROID_USER_HOME"
+          keytool -importkeystore -noprompt \
+            -srckeystore "$RUNNER_TEMP/dev.jks" -srcstorepass "$DEV_STORE_PASSWORD" \
+            -srcalias "$DEV_KEY_ALIAS" -srckeypass "$DEV_KEY_PASSWORD" \
+            -destkeystore "$ANDROID_USER_HOME/debug.keystore" -deststoretype pkcs12 \
+            -deststorepass android -destalias androiddebugkey -destkeypass android
+          rm -f "$RUNNER_TEMP/dev.jks"
+          echo 'EXPECTED_CERT_SHA256=6f301ced512a8d62d5d39182f3a2afa7b9ce95e4edc465637e1a1f61a9a20ac2' >> "$GITHUB_ENV"
+
+      - name: Build APK
+        env:
+          ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
+        run: >-
+          flutter build apk --release --split-per-abi
+          --target-platform "$TARGET_PLATFORMS"
+          --dart-define=APP_ENV=pre
+
+      - name: Verify APK
+        run: |
+          set -euo pipefail
+          tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)"
+          shopt -s nullglob
+          apks=(build/app/outputs/flutter-apk/app-*-release.apk)
+          test "${#apks[@]}" -gt 0
+          for apk in "${apks[@]}"; do
+            package=$("$tools/aapt2" dump packagename "$apk" | tr -d '\r')
+            test "$package" = com.follow.clash.dev
+            certs=$("$tools/apksigner" verify --verbose --print-certs "$apk")
+            printf '%s\n' "$certs"
+            if [ -n "${EXPECTED_CERT_SHA256:-}" ]; then
+              digest=$(sed -n -E 's/^(Signer #1|V[0-9.]+ Signer):? certificate SHA-256 digest: //p' <<<"$certs" | head -n 1 | tr -d ':' | tr '[:upper:]' '[:lower:]')
+              test "$digest" = "$EXPECTED_CERT_SHA256"
+            fi
+            sha256sum "$apk" > "$apk.sha256"
+          done
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: FlClash-android-styles-${{ github.sha }}
+          path: |
+            build/app/outputs/flutter-apk/app-*-release.apk
+            build/app/outputs/flutter-apk/app-*-release.apk.sha256
+          if-no-files-found: error
+          retention-days: 14
