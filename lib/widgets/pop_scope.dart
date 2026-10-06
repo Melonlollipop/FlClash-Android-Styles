@@ -45,6 +45,17 @@ class CommonPopScope extends StatelessWidget {
   }
 }
 
+// Flutter reports whether the app takes back to the engine when routes or
+// PopScopes change, but not when a route's local history does.
+void _announceBackLayer(ModalRoute<dynamic> route) {
+  final context = route.subtreeContext;
+  if (route.isActive && context != null) {
+    NavigationNotification(
+      canHandlePop: route.willHandlePopInternally,
+    ).dispatch(context);
+  }
+}
+
 class BackLayerScope extends StatefulWidget {
   final Widget child;
   final VoidCallback onBack;
@@ -98,15 +109,19 @@ class _BackLayerScopeState extends State<BackLayerScope> {
       }
       final entry = LocalHistoryEntry(
         impliesAppBarDismissal: false,
-        onRemove: _handleRemove,
+        onRemove: () => _handleRemove(route),
       );
       _entry = entry;
       route.addLocalHistoryEntry(entry);
+      _announceBackLayer(route);
     });
   }
 
-  void _handleRemove() {
+  void _handleRemove(ModalRoute<dynamic> route) {
     _entry = null;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _announceBackLayer(route),
+    );
     if (!_isDetaching && mounted) {
       widget.onBack();
     }
