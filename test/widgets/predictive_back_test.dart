@@ -527,6 +527,49 @@ void main() {
       return container;
     }
 
+    Future<void> openAndCloseLayer(
+      WidgetTester tester, {
+      required bool leavePage,
+      bool predictiveBack = true,
+      bool minimizeOnExit = true,
+    }) async {
+      var layerOpen = false;
+      var pageActive = true;
+      late StateSetter setHome;
+      await pumpHome(
+        tester,
+        predictiveBack: predictiveBack,
+        minimizeOnExit: minimizeOnExit,
+        home: StatefulBuilder(
+          builder: (context, setState) {
+            setHome = setState;
+            return PageActivityScope(
+              isActive: pageActive,
+              child: layerOpen
+                  ? BackLayerScope(
+                      onBack: () => setState(() => layerOpen = false),
+                      child: const SizedBox(),
+                    )
+                  : const SizedBox(),
+            );
+          },
+        ),
+      );
+      setHome(() => layerOpen = true);
+      await tester.pumpAndSettle();
+      expect(frameworkHandlesBack.last, isTrue);
+
+      setHome(() {
+        if (leavePage) {
+          pageActive = false;
+        } else {
+          layerOpen = false;
+        }
+      });
+      await tester.pumpAndSettle();
+      expect(layerOpen, isFalse);
+    }
+
     testWidgets('goes to Android while nothing is above the home page', (
       tester,
     ) async {
@@ -614,6 +657,33 @@ void main() {
             container.read(systemActionProvider.notifier) as _CloseCounter;
         expect(systemAction.closes, 1);
       });
+    }
+
+    for (final leavePage in [false, true]) {
+      final closing = leavePage ? 'leaving its page' : 'removing it';
+
+      testWidgets('goes to Android after closing a back layer by $closing', (
+        tester,
+      ) async {
+        await openAndCloseLayer(tester, leavePage: leavePage);
+        expect(frameworkHandlesBack.last, isFalse);
+      });
+
+      for (final (name, predictiveBack, minimizeOnExit) in [
+        ('when predictive back is off', false, true),
+        ('without minimize on exit', true, false),
+      ]) {
+        testWidgets('keeps back in the app while closing a back layer by '
+            '$closing $name', (tester) async {
+          await openAndCloseLayer(
+            tester,
+            leavePage: leavePage,
+            predictiveBack: predictiveBack,
+            minimizeOnExit: minimizeOnExit,
+          );
+          expect(frameworkHandlesBack, everyElement(isTrue));
+        });
+      }
     }
   });
 }

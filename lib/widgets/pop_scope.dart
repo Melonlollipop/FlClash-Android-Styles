@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'inherited.dart';
@@ -119,9 +120,17 @@ class _BackLayerScopeState extends State<BackLayerScope> {
 
   void _handleRemove(ModalRoute<dynamic> route) {
     _entry = null;
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _announceBackLayer(route),
-    );
+    final binding = WidgetsBinding.instance;
+    void announce(Duration _) => _announceBackLayer(route);
+    // An entry removed mid-frame updates the route's PopScopes only in the
+    // next frame, so announcing sooner would report their stale canPop.
+    if (binding.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      binding.addPostFrameCallback(
+        (_) => binding.addPostFrameCallback(announce),
+      );
+    } else {
+      binding.addPostFrameCallback(announce);
+    }
     if (!_isDetaching && mounted) {
       widget.onBack();
     }
