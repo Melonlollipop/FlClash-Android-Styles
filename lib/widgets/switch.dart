@@ -52,20 +52,24 @@ class CommonSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = context.interfaceStyle;
     if (!style.isMiuix) {
-      return Switch(
-        value: value,
-        onChanged: onChanged,
-        padding: padding,
-        materialTapTargetSize: materialTapTargetSize,
+      return RepaintBoundary(
+        child: Switch(
+          value: value,
+          onChanged: onChanged,
+          padding: padding,
+          materialTapTargetSize: materialTapTargetSize,
+        ),
       );
     }
-    return _MiuixSwitch(
-      value: value,
-      onChanged: onChanged,
-      monet: style.miuixMonet,
-      padding: padding ?? _defaultPadding,
-      tapTargetSize:
-          materialTapTargetSize ?? Theme.of(context).materialTapTargetSize,
+    return RepaintBoundary(
+      child: _MiuixSwitch(
+        value: value,
+        onChanged: onChanged,
+        monet: style.miuixMonet,
+        padding: padding ?? _defaultPadding,
+        tapTargetSize:
+            materialTapTargetSize ?? Theme.of(context).materialTapTargetSize,
+      ),
     );
   }
 }
