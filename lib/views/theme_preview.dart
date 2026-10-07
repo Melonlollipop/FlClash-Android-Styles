@@ -244,54 +244,53 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
     return RepaintBoundary(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      alignment: Alignment.center,
-      decoration: ShapeDecoration(
-        color: context.colorScheme.surfaceContainerLow,
-        shape: AppShape.xxl,
-      ),
-      child: SizedBox(
-        width: _phoneWidth,
-        child: AspectRatio(
-          aspectRatio: 9 / 17,
-          child: DecoratedBox(
-            position: DecorationPosition.foreground,
-            decoration: ShapeDecoration(
-              shape: AppShape.all(corner).copyWith(
-                side: BorderSide(color: context.colorScheme.outlineVariant),
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        alignment: Alignment.center,
+        decoration: ShapeDecoration(
+          color: context.colorScheme.surfaceContainerLow,
+          shape: AppShape.xxl,
+        ),
+        child: SizedBox(
+          width: _phoneWidth,
+          child: AspectRatio(
+            aspectRatio: 9 / 17,
+            child: DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: ShapeDecoration(
+                shape: AppShape.all(corner).copyWith(
+                  side: BorderSide(color: context.colorScheme.outlineVariant),
+                ),
               ),
-            ),
-            child: ClipRSuperellipse(
-              borderRadius: AppRadius.all(corner),
-              child: TweenAnimationBuilder<ColorScheme>(
-                tween: _ColorSchemeTween(end: colorScheme),
-                duration: _duration,
-                builder: (_, colorScheme, _) => AnimatedSwitcher(
+              child: ClipRSuperellipse(
+                borderRadius: AppRadius.all(corner),
+                child: TweenAnimationBuilder<ColorScheme>(
+                  tween: _ColorSchemeTween(end: colorScheme),
                   duration: _duration,
-                  child: AnimatedBuilder(
-                    key: ValueKey((
-                      floatingBar,
-                      interfaceStyle.style,
-                      interfaceStyle.liquidGlass,
-                    )),
-                    animation: _slideCurve,
-                    builder: (_, _) => MiniScreen(
-                      colorScheme: colorScheme,
-                      floatingBar: floatingBar,
-                      interfaceStyle: interfaceStyle,
-                      selected: _selected,
-                      previous: _previous,
-                      progress: _previous == null ? 1 : _slideCurve.value,
-                      tabAnimation: tabAnimation,
-                      onSelect: _select,
+                  builder: (_, colorScheme, _) => AnimatedSwitcher(
+                    duration: _duration,
+                    child: AnimatedBuilder(
+                      key: ValueKey((
+                        floatingBar,
+                        interfaceStyle.style,
+                        interfaceStyle.liquidGlass,
+                      )),
+                      animation: _slideCurve,
+                      builder: (_, _) => MiniScreen(
+                        colorScheme: colorScheme,
+                        floatingBar: floatingBar,
+                        interfaceStyle: interfaceStyle,
+                        selected: _selected,
+                        previous: _previous,
+                        progress: _previous == null ? 1 : _slideCurve.value,
+                        tabAnimation: tabAnimation,
+                        onSelect: _select,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
         ),
       ),
     );
