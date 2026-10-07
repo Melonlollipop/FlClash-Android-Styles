@@ -19,7 +19,7 @@ on:
           - android-arm64,android-x64
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -143,3 +143,29 @@ jobs:
             build/app/outputs/flutter-apk/app-*-release.apk.sha256
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish rolling release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(grep -E '^version:' pubspec.yaml | head -n1 | awk '{print $2}' | cut -d'+' -f1)
+          tag=android-styles
+          title="FlClash android-styles · v${version} · $(date -u +%Y-%m-%d)"
+          notes="自动构建：官方 FlClash + android-styles 样式补丁（APP_ENV=pre，应用内更新检查关闭）"
+          notes="${notes}"$'\n'"- 源码提交: $GITHUB_SHA"
+          notes="${notes}"$'\n'"- 包名: com.follow.clash.dev（可与官方版共存）"
+          notes="${notes}"$'\n'"- 签名: 固定开发密钥（CI 校验指纹）"
+          mkdir -p dist
+          for f in build/app/outputs/flutter-apk/app-*-release.apk; do
+            abi=${f#*app-}; abi=${abi%-release.apk}
+            cp "$f" "dist/FlClash-android-styles-$abi.apk"
+            cp "$f.sha256" "dist/FlClash-android-styles-$abi.apk.sha256"
+          done
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" --title "$title" --notes "$notes" --latest
+          else
+            gh release create "$tag" --target "$GITHUB_SHA" --title "$title" --notes "$notes" --latest
+          fi
+          gh release upload "$tag" dist/* --clobber
+
