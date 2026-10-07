@@ -124,24 +124,28 @@ class MiniScreenThumb extends StatelessWidget {
     final shape = AppShape.sm.copyWith(
       side: BorderSide(color: context.colorScheme.outlineVariant),
     );
-    return SizedBox(
-      height: _height,
-      width: _height * _screenSize.width / _shownHeight,
-      child: DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: ShapeDecoration(shape: shape),
-        child: ClipRSuperellipse(
-          borderRadius: AppRadius.sm,
-          child: FittedBox(
-            child: SizedBox(
-              width: _screenSize.width,
-              height: _shownHeight,
-              child: ClipRect(
-                child: OverflowBox(
-                  alignment: Alignment.bottomCenter,
-                  minHeight: _screenSize.height,
-                  maxHeight: _screenSize.height,
-                  child: screen,
+    return RepaintBoundary(
+      // Keep each phone-mock on its own layer: scrolling the theme page or
+      // animating a switch must not re-paint every preview each frame.
+      child: SizedBox(
+        height: _height,
+        width: _height * _screenSize.width / _shownHeight,
+        child: DecoratedBox(
+          position: DecorationPosition.foreground,
+          decoration: ShapeDecoration(shape: shape),
+          child: ClipRSuperellipse(
+            borderRadius: AppRadius.sm,
+            child: FittedBox(
+              child: SizedBox(
+                width: _screenSize.width,
+                height: _shownHeight,
+                child: ClipRect(
+                  child: OverflowBox(
+                    alignment: Alignment.bottomCenter,
+                    minHeight: _screenSize.height,
+                    maxHeight: _screenSize.height,
+                    child: screen,
+                  ),
                 ),
               ),
             ),
@@ -237,8 +241,9 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
     );
     final interfaceStyle = ref.watch(interfaceStyleThemeProvider);
     final corner = AppCorner.fit(_phoneWidth);
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.symmetric(vertical: 24),
       alignment: Alignment.center,
       decoration: ShapeDecoration(
@@ -285,6 +290,8 @@ class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
               ),
             ),
           ),
+        ),
+      ),
         ),
       ),
     );
