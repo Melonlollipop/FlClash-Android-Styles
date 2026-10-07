@@ -1,0 +1,66 @@
+name: sync-upstream
+
+on:
+  schedule:
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure remotes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add styles https://github.com/khiqwq/FlClash-Android-Styles.git
+          git remote add upstream https://github.com/chen08209/FlClash.git
+          git fetch styles
+          git fetch upstream
+
+      - name: Merge styles then upstream
+        id: merge
+        run: |
+          before=$(git rev-parse HEAD)
+          status=ok
+          if ! git merge styles/main --no-edit; then
+            status=styles-conflict
+          fi
+          if [ "$status" = ok ] && ! git merge upstream/main --no-edit; then
+            status=upstream-conflict
+          fi
+          if [ "$status" != ok ]; then
+            git merge --abort || true
+          fi
+          after=$(git rev-parse HEAD)
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          if [ "$before" = "$after" ]; then
+            echo "changed=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push
+        if: steps.merge.outputs.status == 'ok' && steps.merge.outputs.changed == '1'
+        run: git push origin main
+
+      - name: Trigger build
+        if: steps.merge.outputs.status == 'ok' && steps.merge.outputs.changed == '1'
+        run: gh workflow run android-styles.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Flag conflicts
+        if: steps.merge.outputs.status != 'ok'
+        run: |
+          echo "Merge conflict (${{ steps.merge.outputs.status }}) - manual resolution needed"
+          exit 1
