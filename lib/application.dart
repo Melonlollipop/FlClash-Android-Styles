@@ -8,6 +8,7 @@ import 'package:fl_clash/bootstrap.dart';
 import 'package:fl_clash/common/system_dns.dart';
 import 'package:fl_clash/icons/icons.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/views/developer.dart' show performanceOverlayProvider;
 import 'package:fl_clash/manager/hotkey_manager.dart';
 import 'package:fl_clash/manager/manager.dart';
 import 'package:fl_clash/plugins/app.dart';
@@ -168,6 +169,7 @@ class ApplicationState extends ConsumerState<Application> {
         final interfaceStyle = ref.watch(interfaceStyleThemeProvider);
         return MaterialApp(
           debugShowCheckedModeBanner: false,
+          showPerformanceOverlay: ref.watch(performanceOverlayProvider),
           navigatorKey: globalState.navigatorKey,
           localizationsDelegates: const [
             AppLocalizations.delegate,

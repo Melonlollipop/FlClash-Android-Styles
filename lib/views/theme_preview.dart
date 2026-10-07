@@ -175,7 +175,7 @@ class ThemeLivePreview extends ConsumerStatefulWidget {
 class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
     with SingleTickerProviderStateMixin {
   static const double _phoneWidth = 168;
-  static const _duration = Duration(milliseconds: 300);
+  static const _duration = Duration(milliseconds: 150);
 
   late final AnimationController _slide = AnimationController(
     vsync: this,

@@ -11,6 +11,21 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Runtime toggle for Flutter's performance overlay, exposed on the
+/// developer page so release builds can profile animation jank.
+class PerformanceOverlaySetting extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void toggle() => state = !state;
+}
+
+final performanceOverlayProvider =
+    NotifierProvider<PerformanceOverlaySetting, bool>(
+      PerformanceOverlaySetting.new,
+    );
+
+
 class DeveloperView extends ConsumerWidget {
   const DeveloperView({super.key});
 
@@ -106,6 +121,12 @@ class DeveloperView extends ConsumerWidget {
                 },
               ),
             ],
+          ),
+          ListItem.toggle(
+            title: const Text('性能浮层 Performance overlay'),
+            value: ref.watch(performanceOverlayProvider),
+            onChanged: (_) =>
+                ref.read(performanceOverlayProvider.notifier).toggle(),
           ),
           _getDeveloperList(context, ref),
         ],
